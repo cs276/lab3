@@ -10,9 +10,16 @@ function readability(filename, callback) {
     fs.readFile(filename, "utf8", (err, contents) => {
         if (err) throw err;
 
-        // TODO: parse and analyze the file contents
+        contents = contents.replace(/\n/g, ' ') // remove newline characters
 
-        callback({test: "Replace this object with more information!"});
+        let sentences = tokenizeEnglish.sentences()(contents).length;
+        let letters = tokenize.re(/[a-zA-Z]/)(contents).length
+        let numbers = tokenize.re(/[0-9]/)(contents).length
+        let words = tokenize.words()(contents).length
+
+        output = `REPORT for ${filename}\n${letters} characters\n${words} words\n${sentences} sentences\n------------------\nColeman-Liau Score: ${colemanLiau(letters, words, sentences).toFixed(3)}\nAutomated Readability Index: ${automatedReadabilityIndex(letters, numbers, words, sentences).toFixed(3)}`
+
+        callback(output);
     });
 }
 
