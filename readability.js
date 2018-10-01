@@ -5,7 +5,7 @@ const Tokenizer = require('tokenize-text');
 const tokenize = new Tokenizer();
 const tokenizeEnglish = require("tokenize-english")(tokenize);
 
-// Parses a text file into words, sentences, characters
+// Parses a text file into words, sentences, characters, numbers
 function readability(filename, callback) {
     fs.readFile(filename, "utf8", (err, contents) => {
         if (err) throw err;
@@ -45,6 +45,7 @@ function automatedReadabilityIndex(letters, numbers, words, sentences) {
         21.43;
 }
 
+// Prepares report with previously calculated values 
 function prepareReport(filename, letters, words, numbers, sentences, cl_score, ari_score) {
     console.log(`REPORT for ${filename}\n${letters + numbers} characters\n${words} words\n${sentences} sentences\n------------------\nColeman-Liau Score: ${cl_score}\nAutomated Readability Index: ${ari_score}`);
 }
@@ -54,12 +55,15 @@ if (process.argv.length >= 3) {
     let db = new sqlite3.Database('./readability.db', (err) => {
         if (err) throw err
     });
-
+    
+    // Creating unique signature for the file, 
     let hash = md5File.sync(process.argv[2]);
 
-
+    
     check_present = `SELECT * FROM "files" WHERE hash = "${hash}"`
-
+    
+    // Checks if hash value present in database, if so, then print report to console
+    // else, calculate, prepare report, insert into database, and print to console 
     db.get(check_present, [], (err, row) => {
         if (err) {
             return console.error(err.message);
